@@ -156,11 +156,9 @@ func main() {
 	wineCmd.Stderr = os.Stderr
 	err = wineCmd.Run()
 	if err != nil {
-	//	fmt.Println(string(out))
-		panic(err)
+		fmt.Fprintf(os.Stderr, "Error from WINE command:\n%v\n", err)
+		os.Exit(1)
 	}
-	//fmt.Println(string(out))
-	
 }
 
 // default config file created by hasp lm
