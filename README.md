@@ -13,7 +13,7 @@ To use cyme-launcher you must own a CYME license and install it using WINE
 on the system you will be using. You will also need to have installed the
 Sentinel LDK Run-time Environment for Linux.
 
-This utility was tested with CYME 6.x, wine 32-bit 3.0.x, and the Sentinel LDK
+This utility was tested with CYME 8.x, wine 32-bit 3.0.x, and the Sentinel LDK
 RTE 7.x; pull requests with any fixes required for newer versions are greatly
 appreciated.
 
