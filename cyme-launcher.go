@@ -1,17 +1,17 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
+	"flag"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"net/http"
 	"os"
 	"os/exec"
-	"flag"
 	"path/filepath"
 	"strings"
-	"encoding/json"
-	"net/http"
-	"io/ioutil"
-	"bytes"
-	"fmt"
-	"log"
 	"time"
 )
 
@@ -23,7 +23,7 @@ func main() {
 	var hasplmPath string
 	flag.StringVar(&hasplmPath, "hasplmpath", "/usr/workspace/wsb/cyme/sentinel_lm", "the path to the hasplm daemon")
 	var hasplmServer string
-	flag.StringVar(&hasplmServer, "hasplmserver", "eng-tools4.llnl.gov", "remote hasplm server to use")
+	flag.StringVar(&hasplmServer, "hasplmserver", "localhost", "remote hasplm server to use (eg: eng-tools.example.com)")
 	var cymePath string
 	flag.StringVar(&cymePath, "cymepath", "C:\\Program Files\\CYME\\CYME", "path to the cyme installation")
 	var pythonScript string
@@ -69,9 +69,9 @@ func main() {
 		// TODO try to autodetect hasplmd bin directory if not given
 		haspCmd := exec.Command(filepath.Join(hasplmPath, "hasplmd"), "-s")
 		haspCmd.Run()
-	
+
 		// Give it some time to connect to the remote license server and get available licenses
-		time.Sleep(10*time.Second)
+		time.Sleep(10 * time.Second)
 		features, err = GetSentinelFeatures()
 		if err != nil {
 			log.Fatal(err)
@@ -86,15 +86,15 @@ func main() {
 	wineDirPath := "/usr/workspace/wsb/cyme/wine-3.0.2-32"
 
 	// Add WINE libraries to LD_LIBRARY_PATH
-	wineLibToAdd := wineDirPath+"/lib"
-	wineLibToAdd += string(os.PathListSeparator)+wineDirPath+"/usr/lib"
-	wineLibToAdd += string(os.PathListSeparator)+wineDirPath+"/usr/lib/dri"
-	wineLibPath := os.ExpandEnv("${LD_LIBRARY_PATH}"+string(os.PathListSeparator)+wineLibToAdd)
+	wineLibToAdd := wineDirPath + "/lib"
+	wineLibToAdd += string(os.PathListSeparator) + wineDirPath + "/usr/lib"
+	wineLibToAdd += string(os.PathListSeparator) + wineDirPath + "/usr/lib/dri"
+	wineLibPath := os.ExpandEnv("${LD_LIBRARY_PATH}" + string(os.PathListSeparator) + wineLibToAdd)
 	os.Setenv("LD_LIBRARY_PATH", wineLibPath)
 
 	// Add WINE binaries to PATH
-	wineBinToAdd := wineDirPath+"/usr/bin"
-	wineBinPath := os.ExpandEnv("${PATH}"+string(os.PathListSeparator)+wineBinToAdd)
+	wineBinToAdd := wineDirPath + "/usr/bin"
+	wineBinPath := os.ExpandEnv("${PATH}" + string(os.PathListSeparator) + wineBinToAdd)
 	os.Setenv("PATH", wineBinPath)
 
 	fmt.Println(wineBinPath)
@@ -114,7 +114,7 @@ func main() {
 	}
 	fmt.Println(winePrefixTmpDir)
 	//defer os.RemoveAll(winePrefixTmpDir)
-	
+
 	// symlink contents of wine prefix folder to our temporary one
 	files, err := ioutil.ReadDir(winePrefix)
 	if err != nil {
@@ -140,10 +140,9 @@ func main() {
 		fmt.Printf("Licenses used: %v/%v\n", feature.LoginCount, feature.LoginLimit)
 	}
 
-	if (feature == nil || feature.LoginCount >= feature.LoginLimit) {
+	if feature == nil || feature.LoginCount >= feature.LoginLimit {
 		log.Fatal("CYME Network Editor not available")
 	}
-
 
 	//os.Setenv("WINEDEBUG","+relay")
 	var wineCmd *exec.Cmd
@@ -161,9 +160,9 @@ func main() {
 	}
 }
 
-// default config file created by hasp lm
-var haspConfigContents = 
-`
+// default config file settings for hasp lm
+// eventually this should be turned into a struct that gets serialized into a ini file that matches this
+var haspConfigContents = `
 [SERVER]
 name = %v
 idle_session_timeout_mins = 720
@@ -235,43 +234,43 @@ text = {timestamp} {clientaddr}:{clientport} {clientid} {method} {url} {function
 // 1114 - CYME Low Voltage Distribution Network
 // 10000 - CYME International TD Inc
 const (
-	CYMDIST = 1003
-	CYME_SUBSTATION_MODELING = 1019
-	CYME_ENERGY_PROFILE_MANAGER = 1056
-	CYME_LONG_TERM_DYNAMICS = 1066
-	CYME_INTEGRATION_CAPACITY_ANALYSIS = 1080
-	CYME_NETWORK_EDITOR = 1100
-	CYME_PYTHON_SCRIPTING_DEVELOPER = 1112
+	CYMDIST                               = 1003
+	CYME_SUBSTATION_MODELING              = 1019
+	CYME_ENERGY_PROFILE_MANAGER           = 1056
+	CYME_LONG_TERM_DYNAMICS               = 1066
+	CYME_INTEGRATION_CAPACITY_ANALYSIS    = 1080
+	CYME_NETWORK_EDITOR                   = 1100
+	CYME_PYTHON_SCRIPTING_DEVELOPER       = 1112
 	CYME_LOW_VOLTAGE_DISTRIBUTION_NETWORK = 1114
-	CYME_INTERNATIONAL_TD_INC = 10000
+	CYME_INTERNATIONAL_TD_INC             = 10000
 )
 
 type SentinelFeature struct {
-	Index int `json:"ndx,string"`
-	VendorId int `json:"ven,string"`
-	HaspName string `json:"haspname"`
-	HaspId int `json:"haspid,string"`
-	File string `json:"file"`
-	Ip string `json:"ip"`
-	FeatureId int `json:"fid,string"`
+	Index       int    `json:"ndx,string"`
+	VendorId    int    `json:"ven,string"`
+	HaspName    string `json:"haspname"`
+	HaspId      int    `json:"haspid,string"`
+	File        string `json:"file"`
+	Ip          string `json:"ip"`
+	FeatureId   int    `json:"fid,string"`
 	FeatureName string `json:"fn"`
-	Location string `json:"loc"`
-	IsLocal int `json:"isloc,string"`
-	Access string `json:"acc"`
-	Counting string `json:"cnt"` // Station/Process
-	LoginCount int `json:"logc,string"`
-	LoginLimit int `json:"logl,string"`
+	Location    string `json:"loc"`
+	IsLocal     int    `json:"isloc,string"`
+	Access      string `json:"acc"`
+	Counting    string `json:"cnt"` // Station/Process
+	LoginCount  int    `json:"logc,string"`
+	LoginLimit  int    `json:"logl,string"`
 	// logp
-	Detachable int `json:"det,string"` // bool
+	Detachable    int `json:"det,string"` // bool
 	DetachedCount int `json:"detc,string"`
-	Locked int `json:"locked,string"` // bool
+	Locked        int `json:"locked,string"` // bool
 	// dis, ex
-	Unusable int `json:"unusable,string"` // bool
+	Unusable     int    `json:"unusable,string"` // bool
 	Restrictions string `json:"lic"`
-	SessionCount int `json:"sesc,string"`
-	ProductName string `json:"prname"`
-	ProductId int `json:"prid,string"`
-	Type string `json:"typ"`
+	SessionCount int    `json:"sesc,string"`
+	ProductName  string `json:"prname"`
+	ProductId    int    `json:"prid,string"`
+	Type         string `json:"typ"`
 }
 
 func (f *SentinelFeature) Available() bool {
