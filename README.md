@@ -1,7 +1,5 @@
 # cyme-launcher
 
-NOTE: Source code will be released here soon.
-
 cyme-launcher helps with starting up one or more instances of CYME using WINE
 on Linux, in a way that works with HPC clusters. It makes sure that a license
 manager with available licenses is running, and handles the arguments needed
