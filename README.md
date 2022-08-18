@@ -22,6 +22,25 @@ Use `go build cyme-launcher` to compile a self-contained executable. Or use
 must be enabled to run CYME from an SSH session (or a virtual X11 framebuffer
 server should be used, such as using `xvfb-run` to run `cyme-launcher`).
 
+## Usage
+
+The following options are supported for setting up paths:
+
+```
+-cymepath string
+    path to the cyme installation (default "C:\\Program Files\\CYME\\CYME")
+-hasplmpath string
+    the path to the hasplm daemon (default "/usr/workspace/wsb/cyme/sentinel_lm")
+-hasplmserver string
+    remote hasplm server to use (default "localhost")
+-python string
+    python script to run
+-winepath string
+    the root path where wine is installed
+-wineprefix string
+    the wine prefix to use (default "/usr/workspace/wsb/cyme/wine32_prefix")
+```
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first
